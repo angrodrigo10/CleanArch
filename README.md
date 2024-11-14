@@ -21,13 +21,7 @@ Execute o comando abaixo para iniciar os containers em segundo plano:
 docker-compose up -d
 ```
 
-## Passo 2: Iniciar o projeto
-
-```bash
-go run main.go wire_gen.go
-```
-
-## Passo 3: Portas e serviços
+## Passo 2: Portas e serviços
 
 | Serviço            | Porta |
 |--------------------|-------|
