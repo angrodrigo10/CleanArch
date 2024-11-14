@@ -12,7 +12,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./sql/migrations:/docker-entrypoint-initdb.d  # Mapeia o diretório de migrações para rodar na inicialização
+      - ./sql/migrations:/docker-entrypoint-initdb.d
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -36,7 +36,28 @@ services:
           echo 'Aguardando o banco de dados...';
           sleep 2;
         done;
-        migrate -path=sql/migrations -database 'mysql://root:root@tcp(localhost:3306)/orders' -verbose up;
+        migrate -path=/migrations -database 'mysql://root:root@tcp(mysql:3306)/orders' -verbose up;
       "
     volumes:
-      - ./sql/migrations:/migrations  # Mapeia o diretório de migrações
+      - ./sql/migrations:/migrations
+
+  app:
+    build:
+      context: .  # Diretório onde está seu Dockerfile da aplicação Go
+      dockerfile: Dockerfile
+    container_name: app
+    depends_on:
+      - mysql
+      - rabbitmq
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: orders
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    ports:
+      - 8000:8000   # Porta do servidor web
+      - 50051:50051 # Porta do servidor gRPC
+      - 8080:8080   # Porta do servidor GraphQL
